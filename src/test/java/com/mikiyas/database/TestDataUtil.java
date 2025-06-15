@@ -11,7 +11,7 @@ public final class TestDataUtil {
     }
 
     public static Author createAuthor() {
-        return Author.builder().id(1L).name("Author 1").age(23).build();
+        return Author.builder().name("Author 1").age(23).build();
     }
 
     public static List<Author> createMultipleAuthors() {
@@ -22,16 +22,16 @@ public final class TestDataUtil {
         );
     }
 
-    public static Book createTestBook() {
-        return Book.builder().isbn("978-2-6542-65433-0").title("Book 1").authorId(1L).build();
+    public static Book createTestBook(final Author author) {
+        return Book.builder().isbn("978-2-6542-65433-0").title("Book 1").author(author).build();
     }
 
 
-    public static List<Book> createMultipleBooks() {
+    public static List<Book> createMultipleBooks(final Author author) {
         return List.of(
-                Book.builder().isbn("978-2-6542-65433-0").title("Book 1").authorId(1L).build(),
-                Book.builder().isbn("978-2-6542-65433-1").title("Book 2").authorId(1L).build(),
-                Book.builder().isbn("978-2-6542-65433-2").title("Book 3").authorId(1L).build()
+                Book.builder().isbn("978-2-6542-65433-0").title("Book 1").author(author).build(),
+                Book.builder().isbn("978-2-6542-65433-1").title("Book 2").author(author).build(),
+                Book.builder().isbn("978-2-6542-65433-2").title("Book 3").author(author).build()
         );
     }
 }
