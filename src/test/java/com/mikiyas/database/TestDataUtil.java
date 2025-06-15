@@ -1,0 +1,37 @@
+package com.mikiyas.database;
+
+import com.mikiyas.database.domain.Author;
+import com.mikiyas.database.domain.Book;
+
+import java.util.List;
+
+public final class TestDataUtil {
+
+    private TestDataUtil() {
+    }
+
+    public static Author createAuthor() {
+        return Author.builder().id(1L).name("Author 1").age(23).build();
+    }
+
+    public static List<Author> createMultipleAuthors() {
+        return List.of(
+                Author.builder().id(1L).name("Author 1").age(23).build(),
+                Author.builder().id(2L).name("Author 2").age(35).build(),
+                Author.builder().id(3L).name("Author 2").age(29).build()
+        );
+    }
+
+    public static Book createTestBook() {
+        return Book.builder().isbn("978-2-6542-65433-0").title("Book 1").authorId(1L).build();
+    }
+
+
+    public static List<Book> createMultipleBooks() {
+        return List.of(
+                Book.builder().isbn("978-2-6542-65433-0").title("Book 1").authorId(1L).build(),
+                Book.builder().isbn("978-2-6542-65433-1").title("Book 2").authorId(1L).build(),
+                Book.builder().isbn("978-2-6542-65433-2").title("Book 3").authorId(1L).build()
+        );
+    }
+}
