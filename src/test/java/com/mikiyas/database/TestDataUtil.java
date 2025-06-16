@@ -16,9 +16,9 @@ public final class TestDataUtil {
 
     public static List<Author> createMultipleAuthors() {
         return List.of(
-                Author.builder().id(1L).name("Author 1").age(23).build(),
-                Author.builder().id(2L).name("Author 2").age(35).build(),
-                Author.builder().id(3L).name("Author 2").age(29).build()
+                Author.builder().name("Author 1").age(23).build(),
+                Author.builder().name("Author 2").age(35).build(),
+                Author.builder().name("Author 2").age(29).build()
         );
     }
 
