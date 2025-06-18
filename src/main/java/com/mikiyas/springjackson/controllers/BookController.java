@@ -1,9 +1,12 @@
 package com.mikiyas.springjackson.controllers;
 
+import com.mikiyas.springjackson.domain.dto.AuthorDto;
 import com.mikiyas.springjackson.domain.dto.BookDto;
 import com.mikiyas.springjackson.domain.entities.BookEntity;
 import com.mikiyas.springjackson.mappers.impl.BookMapperImpl;
 import com.mikiyas.springjackson.services.BookService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,11 +45,11 @@ public class BookController {
     }
 
     @GetMapping
-    public List<BookDto> listBooks() {
-        List<BookEntity> books = bookService.findAll();
-        return books.stream().map(
+    public Page<BookDto> listBooks(Pageable pageable) {
+        Page<BookEntity> books = bookService.findAll(pageable);
+        return books.map(
                 bookMapper::mapTo
-        ).collect(Collectors.toList());
+        );
     }
 
     @GetMapping("/{isbn}")
@@ -58,5 +61,27 @@ public class BookController {
         }).orElse(
                 new ResponseEntity<>(HttpStatus.NOT_FOUND)
         );
+    }
+
+    @PatchMapping("/{isbn}")
+    public ResponseEntity<BookDto> partialUpdateBook(@PathVariable("isbn") String isbn, @RequestBody BookDto book) {
+        boolean bookExists = bookService.isExists(isbn);
+
+        if (!bookExists) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        BookEntity bookEntity = bookMapper.mapFrom(book);
+        BookEntity savedBook = bookService.partialUpdate(isbn, bookEntity);
+        BookDto savedBookDto = bookMapper.mapTo(savedBook);
+
+        return new ResponseEntity<>(savedBookDto,
+                HttpStatus.OK);
+
+    }
+
+    @DeleteMapping("/{isbn}")
+    public ResponseEntity<BookDto> deleteBook(@PathVariable("isbn") String isbn) {
+        bookService.delete(isbn);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

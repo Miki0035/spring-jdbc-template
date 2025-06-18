@@ -2,9 +2,7 @@ package com.mikiyas.springjackson.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mikiyas.springjackson.TestDataUtil;
-import com.mikiyas.springjackson.domain.dto.AuthorDto;
 import com.mikiyas.springjackson.domain.dto.BookDto;
-import com.mikiyas.springjackson.domain.entities.AuthorEntity;
 import com.mikiyas.springjackson.domain.entities.BookEntity;
 import com.mikiyas.springjackson.mappers.impl.BookMapperImpl;
 import com.mikiyas.springjackson.services.impl.BookServiceImpl;
@@ -18,8 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.awt.print.Book;
-import java.util.List;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -179,4 +175,66 @@ public class BookControllerIntegrationTests {
 
     }
 
+    @Test
+    public void testThatPartialUpdateBookReturnHttpStatu200Ok() throws Exception {
+        BookDto bookDto = TestDataUtil.createTestBook(null);
+        BookEntity bookEntity = bookMapper.mapFrom(bookDto);
+        bookService.createUpdateBook(bookDto.getIsbn(), bookEntity);
+
+        bookDto.setTitle("UPDATED 689");
+        String bookJson = objectMapper.writeValueAsString(bookDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/api/v1/books/" + bookDto.getIsbn())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bookJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+    }
+
+    @Test
+    public void testThatPartialUpdateBookReturnUpdatedBook() throws Exception {
+        BookDto bookDto = TestDataUtil.createTestBook(null);
+        BookEntity bookEntity = bookMapper.mapFrom(bookDto);
+        bookService.createUpdateBook(bookDto.getIsbn(), bookEntity);
+
+        bookDto.setTitle("UPDATED 689");
+        String bookJson = objectMapper.writeValueAsString(bookDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/api/v1/books/" + bookDto.getIsbn())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bookJson)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.title").value(bookDto.getTitle())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.isbn").value(bookDto.getIsbn())
+        );
+    }
+
+    @Test
+    public void testThatDeleteBookReturnHttpStatus204ForNonExistingBook() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/v1/books/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(
+                MockMvcResultMatchers.status().isNoContent()
+        );
+
+    }
+
+    @Test
+    public void testThatDeleteBookReturnHttpStatus204ForExistingBook() throws Exception {
+        BookDto bookDto = TestDataUtil.createTestBook(null);
+        BookEntity bookEntity = bookMapper.mapFrom(bookDto);
+        BookEntity savedBookEntity = bookService.createUpdateBook(bookDto.getIsbn(), bookEntity);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/v1/books/" + savedBookEntity.getIsbn())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(
+                MockMvcResultMatchers.status().isNoContent()
+        );
+    }
 }
