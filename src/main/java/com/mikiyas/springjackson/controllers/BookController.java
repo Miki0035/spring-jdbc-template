@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,11 +25,19 @@ public class BookController {
     }
 
     @PutMapping("/{isbn}")
-    public ResponseEntity<BookDto> createBook(@PathVariable("isbn") String isbn, @RequestBody BookDto book) {
+    public ResponseEntity<BookDto> createUpdateBook(@PathVariable("isbn") String isbn, @RequestBody BookDto book) {
         BookEntity bookEntity = bookMapper.mapFrom(book);
-        BookEntity savedBook = bookService.createBook(isbn, bookEntity);
+        boolean bookExists = bookService.isExists(isbn);
+        BookEntity savedBook = bookService.createUpdateBook(isbn, bookEntity);
         BookDto savedBookDto = bookMapper.mapTo(savedBook);
-        return new ResponseEntity<>(savedBookDto, HttpStatus.CREATED);
+
+        if (bookExists) {
+            return new ResponseEntity<>(savedBookDto, HttpStatus.OK);
+
+        } else {
+            return new ResponseEntity<>(savedBookDto, HttpStatus.CREATED);
+        }
+
 
     }
 
@@ -38,5 +47,16 @@ public class BookController {
         return books.stream().map(
                 bookMapper::mapTo
         ).collect(Collectors.toList());
+    }
+
+    @GetMapping("/{isbn}")
+    public ResponseEntity<BookDto> getBook(@PathVariable("isbn") String isbn) {
+        Optional<BookEntity> bookEntity = bookService.findOne(isbn);
+        return bookEntity.map(book -> {
+            BookDto bookDto = bookMapper.mapTo(book);
+            return new ResponseEntity<BookDto>(bookDto, HttpStatus.OK);
+        }).orElse(
+                new ResponseEntity<>(HttpStatus.NOT_FOUND)
+        );
     }
 }
